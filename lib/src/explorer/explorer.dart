@@ -17,6 +17,9 @@ class Explorer extends StatefulWidget {
 class _Explorer extends State<Explorer> {
   final nameInputController = TextEditingController();
 
+  String _name;
+  User _user;
+
   @override
   void initState() {
     super.initState();
@@ -30,19 +33,25 @@ class _Explorer extends State<Explorer> {
     super.dispose();
   }
 
-  Future<User> fetchUser(username) async {
+  void fetchUser(username) async {
     final response = await http.get("https://api.github.com/users/$username");
     if (response.statusCode == 200) {
       // If server returns an OK response, parse the JSON.
-      return User.fromJson(json.decode(response.body));
+      User user = User.fromJson(json.decode(response.body));
+      setState(() {
+        _user = user;
+      });
     } else {
-      // If that response was not OK, throw an error.
-      throw Exception('Failed to load User');
+      // If that response was not OK
     }
   }
 
   void _onNameInputChanged() {
     print("Second text field: ${nameInputController.text}");
+    setState(() {
+      _name = nameInputController.text;
+    });
+    fetchUser(nameInputController.text);
   }
 
   @override
@@ -60,13 +69,14 @@ class _Explorer extends State<Explorer> {
           TextField(
             controller: nameInputController,
           ),
-          ProfileInfo(
-            userName: "Bapth-dej",
-            bio: "Web developper React | Elm",
-            imageUrl:
-                "https://avatars3.githubusercontent.com/u/45099063?s=460&v=4",
-          ),
-        ],
+          _user != null
+              ? ProfileInfo(
+                  userName: _user.getName(),
+                  bio: _user.getBio(),
+                  imageUrl: _user.getAvatarUrl(),
+                )
+              : null,
+        ].where((t) => t != null).toList(),
       ),
     );
   }

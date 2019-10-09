@@ -9,4 +9,8 @@ class User {
     return User(
         avatarUrl: json['avatar_url'], name: json['name'], bio: json['bio']);
   }
+
+  String getAvatarUrl() => this.avatarUrl;
+  String getName() => this.name;
+  String getBio() => this.bio;
 }
