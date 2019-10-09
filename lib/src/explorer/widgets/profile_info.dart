@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import './styles/styles.dart';
+import 'package:flutter_github_explorer/styles.dart';
 
 class ProfileInfo extends StatelessWidget {
   final String imageUrl;
