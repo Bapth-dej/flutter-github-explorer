@@ -7,7 +7,9 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-        avatarUrl: json['avatar_url'], name: json['name'], bio: json['bio']);
+        avatarUrl: json['avatar_url'] ?? "",
+        name: json['name'] ?? json['login'],
+        bio: json['bio'] ?? "");
   }
 
   String getAvatarUrl() => this.avatarUrl;

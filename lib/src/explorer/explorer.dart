@@ -33,16 +33,27 @@ class _Explorer extends State<Explorer> {
     super.dispose();
   }
 
-  void fetchUser(username) async {
-    final response = await http.get("https://api.github.com/users/$username");
+  void fetchUser() async {
+    print("fetching");
+    final response = await http.get("https://api.github.com/users/$_name");
     if (response.statusCode == 200) {
+      print("ok");
       // If server returns an OK response, parse the JSON.
-      User user = User.fromJson(json.decode(response.body));
-      setState(() {
-        _user = user;
-      });
+      Map<String, dynamic> jsonResponse = json.decode(response.body);
+      print(jsonResponse);
+      if (jsonResponse['name'] != null) {
+        print("valid");
+        User user = User.fromJson(jsonResponse);
+        setState(() {
+          _user = user;
+        });
+      }
     } else {
+      print("nope");
       // If that response was not OK
+      setState(() {
+        _user = null;
+      });
     }
   }
 
@@ -51,7 +62,6 @@ class _Explorer extends State<Explorer> {
     setState(() {
       _name = nameInputController.text;
     });
-    fetchUser(nameInputController.text);
   }
 
   @override
@@ -69,12 +79,22 @@ class _Explorer extends State<Explorer> {
           TextField(
             controller: nameInputController,
           ),
+          RaisedButton(
+            onPressed: () => fetchUser(),
+            child: Text('Fetch user'),
+          ),
           _user != null
-              ? ProfileInfo(
-                  userName: _user.getName(),
-                  bio: _user.getBio(),
-                  imageUrl: _user.getAvatarUrl(),
-                )
+              ? Card(
+                  child: InkWell(
+                      splashColor: Colors.deepOrange,
+                      onTap: () {
+                        print('Card tapped.');
+                      },
+                      child: ProfileInfo(
+                        userName: _user.getName(),
+                        bio: _user.getBio(),
+                        imageUrl: _user.getAvatarUrl(),
+                      )))
               : null,
         ].where((t) => t != null).toList(),
       ),
