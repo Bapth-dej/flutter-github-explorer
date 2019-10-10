@@ -7,18 +7,22 @@ class Styles {
   static final Color _textColorDefault = _hexToColor('666666');
   static final String _fontNameDefault = 'GlacialIndifference';
 
-  static final navBarTitle =
-      TextStyle(fontFamily: _fontNameDefault, fontWeight: FontWeight.w700);
+  static final navBarTitle = TextStyle(
+    fontFamily: _fontNameDefault,
+    fontWeight: FontWeight.w700,
+  );
 
   static final headerLarge = TextStyle(
-      fontFamily: _fontNameDefault,
-      fontSize: _textSizeLarge,
-      color: _textColorStrong);
+    fontFamily: _fontNameDefault,
+    fontSize: _textSizeLarge,
+    color: _textColorStrong,
+  );
 
   static final textDefault = TextStyle(
-      fontFamily: _fontNameDefault,
-      fontSize: _textSizeDefault,
-      color: _textColorDefault);
+    fontFamily: _fontNameDefault,
+    fontSize: _textSizeDefault,
+    color: _textColorDefault,
+  );
 
   static Color _hexToColor(String code) {
     return Color(int.parse(code.substring(0, 6), radix: 16) + 0xFF000000);

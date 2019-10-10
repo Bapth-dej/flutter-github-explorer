@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_github_explorer/explorer.dart';
+import 'package:flutter_github_explorer/list_repos.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(ChangeNotifierProvider(
+      builder: (context) => ListRepos(),
+      child: MyApp(),
+    ));
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

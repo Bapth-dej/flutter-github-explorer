@@ -41,7 +41,7 @@ class _Explorer extends State<Explorer> {
       // If server returns an OK response, parse the JSON.
       Map<String, dynamic> jsonResponse = json.decode(response.body);
       print(jsonResponse);
-      if (jsonResponse['name'] != null) {
+      if (jsonResponse['login'] != null) {
         print("valid");
         User user = User.fromJson(jsonResponse);
         setState(() {

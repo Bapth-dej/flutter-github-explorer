@@ -6,19 +6,30 @@ class ProfileInfo extends StatelessWidget {
   final String userName;
   final String bio;
 
-  ProfileInfo({this.userName, this.bio, this.imageUrl});
+  ProfileInfo({
+    this.userName,
+    this.bio,
+    this.imageUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Image.network(
-          this.imageUrl,
-          fit: BoxFit.fitWidth,
-        ),
-        Text(
-          this.userName,
-          style: Styles.headerLarge,
+        Row(
+          children: <Widget>[
+            Image.network(
+              this.imageUrl,
+              width: 200,
+              fit: BoxFit.fitWidth,
+            ),
+            Flexible(
+              child: Text(
+                this.userName,
+                style: Styles.headerLarge,
+              ),
+            )
+          ],
         ),
         Text(
           this.bio,
