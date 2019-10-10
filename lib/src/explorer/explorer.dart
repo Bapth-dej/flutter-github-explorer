@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_github_explorer/repos_change_notifier.dart';
+import 'package:flutter_github_explorer/src/list_repos/models/list_repos_model.dart';
 import 'package:flutter_github_explorer/styles.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'dart:convert';
 
 import './widgets/profile_info.dart';
@@ -17,7 +20,8 @@ class Explorer extends StatefulWidget {
 class _Explorer extends State<Explorer> {
   final nameInputController = TextEditingController();
 
-  String _name;
+  String _name = "";
+  bool _clickable = false;
   User _user;
 
   @override
@@ -33,28 +37,49 @@ class _Explorer extends State<Explorer> {
     super.dispose();
   }
 
+  void handleFetch() {
+    setState(() {
+      _user = null;
+      _clickable = false;
+    });
+    fetchUser();
+    fetchRepos();
+  }
+
   void fetchUser() async {
-    print("fetching");
+    print("fetching user");
     final response = await http.get("https://api.github.com/users/$_name");
     if (response.statusCode == 200) {
-      print("ok");
       // If server returns an OK response, parse the JSON.
       Map<String, dynamic> jsonResponse = json.decode(response.body);
-      print(jsonResponse);
       if (jsonResponse['login'] != null) {
-        print("valid");
         User user = User.fromJson(jsonResponse);
         setState(() {
           _user = user;
         });
       }
     } else {
-      print("nope");
       // If that response was not OK
       setState(() {
         _user = null;
       });
     }
+    print("done fetching user");
+  }
+
+  void fetchRepos() async {
+    print("fetching repos");
+    final response =
+        await http.get("https://api.github.com/users/$_name/repos");
+    if (response.statusCode == 200) {
+      ListReposModel listOfRepos =
+          ListReposModel.fromJson(json.decode(response.body));
+      setState(() {
+        _clickable = true;
+      });
+      Provider.of<Repos>(context, listen: false).updateListRepos(listOfRepos);
+    }
+    print("done fetching repos");
   }
 
   void _onNameInputChanged() {
@@ -77,23 +102,28 @@ class _Explorer extends State<Explorer> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           TextField(
+            autocorrect: false,
+            autofocus: true,
             controller: nameInputController,
+            cursorColor: Colors.deepOrangeAccent,
+            onEditingComplete: fetchUser,
           ),
           RaisedButton(
-            onPressed: () => fetchUser(),
+            onPressed: () => handleFetch(),
             child: Text('Fetch user'),
           ),
           _user != null
               ? Card(
+                  elevation: 8.0,
                   child: InkWell(
                       splashColor: Colors.deepOrange,
                       onTap: () {
                         print('Card tapped.');
                       },
                       child: ProfileInfo(
-                        userName: _user.getName(),
-                        bio: _user.getBio(),
-                        imageUrl: _user.getAvatarUrl(),
+                        userName: _user.name,
+                        bio: _user.bio,
+                        imageUrl: _user.avatarUrl,
                       )))
               : null,
         ].where((t) => t != null).toList(),

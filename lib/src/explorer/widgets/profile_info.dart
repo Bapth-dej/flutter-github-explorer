@@ -31,10 +31,13 @@ class ProfileInfo extends StatelessWidget {
             )
           ],
         ),
-        Text(
-          this.bio,
-          style: Styles.textDefault,
-        )
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            this.bio,
+            style: Styles.textDefault,
+          ),
+        ),
       ],
     );
   }
