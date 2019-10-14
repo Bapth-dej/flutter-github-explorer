@@ -96,6 +96,10 @@ class ListRepos extends StatelessWidget {
                         style: Styles.headerLarge,
                       ),
                       Text(
+                        "(${_currRepo.language})",
+                        style: Styles.textDefault,
+                      ),
+                      Text(
                         _currRepo.description,
                         style: Styles.textDefault,
                       ),
