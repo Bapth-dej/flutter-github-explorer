@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_github_explorer/repos_change_notifier.dart';
 import 'package:flutter_github_explorer/src/list_repos/models/repo_model.dart';
 import 'package:flutter_github_explorer/styles.dart';
 import 'package:flutter_github_explorer/order_list_by.dart';
+import 'package:flutter_github_explorer/repo_s_readme.dart';
 import 'package:provider/provider.dart';
 
 class ListRepos extends StatelessWidget {
@@ -42,6 +46,34 @@ class ListRepos extends StatelessWidget {
         return "Language used";
       default:
         return null;
+    }
+  }
+
+  void _handleRepoTap(BuildContext context, int index, String reponame) async {
+    print("Fetching $username, $reponame");
+    final response = await http
+        .get("https://api.github.com/repos/$username/$reponame/readme");
+    if (response.statusCode == 200) {
+      // If server returns an OK response, parse the JSON.
+      Map<String, dynamic> jsonResponse = json.decode(response.body);
+      const base64 = Base64Decoder();
+      const utf8 = Utf8Codec();
+      try {
+        var content = jsonResponse['content'].replaceAll(new RegExp(r'\n'), '');
+        print(content);
+        // "SGVsbG8gd29ybGQ="
+        var decodedresponse = base64.convert(content);
+        var textResponse = utf8.decode(decodedresponse);
+        print(textResponse);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ReposReadme(reponame, textResponse)));
+      } catch (e) {
+        print(e.toString());
+      }
+    } else {
+      print("ko ${json.decode(response.body)}");
     }
   }
 
@@ -89,22 +121,29 @@ class ListRepos extends StatelessWidget {
                 final _currRepo = listOfRepos[index];
                 return Card(
                   elevation: 8.0,
-                  child: Column(
-                    children: <Widget>[
-                      Text(
-                        _currRepo.name,
-                        style: Styles.headerLarge,
-                      ),
-                      Text(
-                        "(${_currRepo.language})",
-                        style: Styles.textDefault,
-                      ),
-                      Text(
-                        _currRepo.description,
-                        style: Styles.textDefault,
-                      ),
-                      Text("Created: ${_currRepo.createdAt.toString()}"),
-                    ],
+                  child: InkWell(
+                    onTap: () => _handleRepoTap(
+                      context,
+                      index,
+                      _currRepo.name,
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        Text(
+                          _currRepo.name,
+                          style: Styles.headerLarge,
+                        ),
+                        Text(
+                          "(${_currRepo.language})",
+                          style: Styles.textDefault,
+                        ),
+                        Text(
+                          _currRepo.description,
+                          style: Styles.textDefault,
+                        ),
+                        Text("Created: ${_currRepo.createdAt.toString()}"),
+                      ],
+                    ),
                   ),
                 );
               },
