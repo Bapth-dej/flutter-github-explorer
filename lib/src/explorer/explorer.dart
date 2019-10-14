@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_github_explorer/repos_change_notifier.dart';
-import 'package:flutter_github_explorer/src/list_repos/models/list_repos_model.dart';
+import 'package:flutter_github_explorer/src/list_repos/list_repos.dart';
+import 'package:flutter_github_explorer/src/list_repos/models/repo_model.dart';
 import 'package:flutter_github_explorer/styles.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -72,12 +73,25 @@ class _Explorer extends State<Explorer> {
     final response =
         await http.get("https://api.github.com/users/$_name/repos");
     if (response.statusCode == 200) {
-      ListReposModel listOfRepos =
-          ListReposModel.fromJson(json.decode(response.body));
+      List<RepoModel> listOfRepos = [];
+      List<Map<String, dynamic>> listOfMapRepos = [];
+      List<dynamic> jsonListOfrepos = json.decode(response.body);
+      for (var jsonRepo in jsonListOfrepos) {
+        if (jsonRepo is Map<String, dynamic>) {
+          listOfMapRepos.add(jsonRepo);
+          print("ok ${jsonRepo['name']}");
+        } else
+          print("ko $jsonRepo");
+      }
+      for (var jsonRepo in jsonListOfrepos) {
+        listOfRepos.add(RepoModel.fromJson(jsonRepo));
+      }
       setState(() {
         _clickable = true;
       });
       Provider.of<Repos>(context, listen: false).updateListRepos(listOfRepos);
+      Provider.of<Repos>(context, listen: false)
+          .updateJsonListRepos(listOfMapRepos);
     }
     print("done fetching repos");
   }
@@ -87,6 +101,12 @@ class _Explorer extends State<Explorer> {
     setState(() {
       _name = nameInputController.text;
     });
+  }
+
+  void _navigateToReposList(BuildContext context, String username) {
+    if (_clickable)
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => ListRepos(username)));
   }
 
   @override
@@ -118,7 +138,7 @@ class _Explorer extends State<Explorer> {
                   child: InkWell(
                       splashColor: Colors.deepOrange,
                       onTap: () {
-                        print('Card tapped.');
+                        _navigateToReposList(context, _user.name);
                       },
                       child: ProfileInfo(
                         userName: _user.name,
