@@ -2,36 +2,33 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_github_explorer/repos_change_notifier.dart';
-import 'package:flutter_github_explorer/src/list_repos/models/repo_model.dart';
 import 'package:flutter_github_explorer/styles.dart';
-import 'package:flutter_github_explorer/order_list_by.dart';
-import 'package:flutter_github_explorer/repo_s_readme.dart';
+import '../../models/order_list_by.dart';
 import 'package:provider/provider.dart';
 
+import '../../providers/repos_change_notifier.dart';
+import '../../models/repo_model.dart';
+import '../../models/user.dart';
+
 class ListRepos extends StatelessWidget {
-  final String username;
-  ListRepos(this.username);
+  final navigateToRepoReadMe;
+
+  ListRepos({this.navigateToRepoReadMe});
 
   List<RepoModel> _getListOfReposOrderedBy(
-      List<Map<String, dynamic>> jsonListOfrepos, OrderListBy orderListBy) {
+      List<RepoModel> originalListOfRepos, OrderListBy orderListBy) {
+    List<RepoModel> listOfRepos = originalListOfRepos;
     switch (orderListBy) {
       case OrderListBy.date:
-        jsonListOfrepos
-            .sort((a, b) => -(a['created_at']).compareTo(b['created_at']));
+        listOfRepos.sort((a, b) => -(a.createdAt).compareTo(b.createdAt));
         break;
       case OrderListBy.alphabetical:
-        jsonListOfrepos.sort((a, b) =>
-            (a['name'].toLowerCase()).compareTo(b['name'].toLowerCase()));
+        listOfRepos.sort(
+            (a, b) => (a.name.toLowerCase()).compareTo(b.name.toLowerCase()));
         break;
       case OrderListBy.language:
-        jsonListOfrepos
-            .sort((a, b) => (a['language']).compareTo(b['language']));
+        listOfRepos.sort((a, b) => (a.language).compareTo(b.language));
         break;
-    }
-    List<RepoModel> listOfRepos = [];
-    for (var jsonRepo in jsonListOfrepos) {
-      listOfRepos.add(RepoModel.fromJson(jsonRepo));
     }
     return listOfRepos;
   }
@@ -49,10 +46,11 @@ class ListRepos extends StatelessWidget {
     }
   }
 
-  void _handleRepoTap(BuildContext context, int index, String reponame) async {
-    print("Fetching $username, $reponame");
-    final response = await http
-        .get("https://api.github.com/repos/$username/$reponame/readme");
+  void _handleRepoTap(
+      BuildContext context, int index, User user, RepoModel repo) async {
+    print("Fetching ${user.username}, ${repo.name}");
+    final response = await http.get(
+        "https://api.github.com/repos/${user.username}/${repo.name}/readme");
     if (response.statusCode == 200) {
       // If server returns an OK response, parse the JSON.
       Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -65,10 +63,8 @@ class ListRepos extends StatelessWidget {
         var decodedresponse = base64.convert(content);
         var textResponse = utf8.decode(decodedresponse);
         print(textResponse);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ReposReadme(reponame, textResponse)));
+        Provider.of<Repos>(context, listen: false)
+            .updateCurrentSearchedRepoReadme(textResponse);
       } catch (e) {
         print(e.toString());
       }
@@ -80,9 +76,11 @@ class ListRepos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<RepoModel> listOfRepos = _getListOfReposOrderedBy(
-      Provider.of<Repos>(context).jsonListOfrepos,
+      Provider.of<Repos>(context).currentSearchedUserListOfRepos,
       Provider.of<Repos>(context).orderListBy,
     );
+
+    final user = Provider.of<Repos>(context).currentSearchedUser;
 
     var _orderListByItems = [
       OrderListBy.date,
@@ -92,7 +90,7 @@ class ListRepos extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("$username's repos"),
+        title: Text("${user.name}'s repos"),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -125,7 +123,8 @@ class ListRepos extends StatelessWidget {
                     onTap: () => _handleRepoTap(
                       context,
                       index,
-                      _currRepo.name,
+                      user,
+                      _currRepo,
                     ),
                     child: Column(
                       children: <Widget>[

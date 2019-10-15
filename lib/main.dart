@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_github_explorer/explorer.dart';
-import 'package:flutter_github_explorer/repos_change_notifier.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_github_explorer/home.dart';
 
-void main() => runApp(ChangeNotifierProvider(
-      builder: (context) => Repos(),
-      child: MyApp(),
-    ));
+void main() => runApp(
+      MyApp(),
+    );
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -17,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepOrange,
       ),
-      home: Explorer(title: 'GitHub Explorer'),
+      home: Home(title: 'GitHub Explorer'),
     );
   }
 }

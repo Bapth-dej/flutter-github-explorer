@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_github_explorer/repos_change_notifier.dart';
-import 'package:flutter_github_explorer/src/list_repos/list_repos.dart';
-import 'package:flutter_github_explorer/src/list_repos/models/repo_model.dart';
 import 'package:flutter_github_explorer/styles.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'dart:convert';
 
 import './widgets/profile_info.dart';
-import './models/user.dart';
+import '../list_repos/list_repos.dart';
+import '../../models/repo_model.dart';
+import '../../models/user.dart';
+import '../../providers/repos_change_notifier.dart';
 
 class Explorer extends StatefulWidget {
-  final String title;
-  Explorer({Key key, this.title}) : super(key: key);
+  final navigateToReposList;
+
+  Explorer({this.navigateToReposList});
 
   @override
   _Explorer createState() => _Explorer();
@@ -89,9 +90,8 @@ class _Explorer extends State<Explorer> {
       setState(() {
         _clickable = true;
       });
-      Provider.of<Repos>(context, listen: false).updateListRepos(listOfRepos);
       Provider.of<Repos>(context, listen: false)
-          .updateJsonListRepos(listOfMapRepos);
+          .updateCurrentSearchedUserListOfRepos(listOfRepos);
     }
     print("done fetching repos");
   }
@@ -103,51 +103,39 @@ class _Explorer extends State<Explorer> {
     });
   }
 
-  void _navigateToReposList(BuildContext context, String username) {
-    if (_clickable)
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => ListRepos(username)));
+  void _navigateToReposList() {
+    if (_clickable) widget.navigateToReposList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: Styles.navBarTitle,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        TextField(
+          autocorrect: false,
+          autofocus: true,
+          controller: nameInputController,
+          cursorColor: Colors.deepOrangeAccent,
+          onEditingComplete: fetchUser,
         ),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          TextField(
-            autocorrect: false,
-            autofocus: true,
-            controller: nameInputController,
-            cursorColor: Colors.deepOrangeAccent,
-            onEditingComplete: fetchUser,
-          ),
-          RaisedButton(
-            onPressed: () => handleFetch(),
-            child: Text('Fetch user'),
-          ),
-          _user != null
-              ? Card(
-                  elevation: 8.0,
-                  child: InkWell(
-                      splashColor: Colors.deepOrange,
-                      onTap: () {
-                        _navigateToReposList(context, _user.name);
-                      },
-                      child: ProfileInfo(
-                        userName: _user.name,
-                        bio: _user.bio,
-                        imageUrl: _user.avatarUrl,
-                      )))
-              : null,
-        ].where((t) => t != null).toList(),
-      ),
+        RaisedButton(
+          onPressed: () => handleFetch(),
+          child: Text('Fetch user'),
+        ),
+        _user != null
+            ? Card(
+                elevation: 8.0,
+                child: InkWell(
+                    splashColor: Colors.deepOrange,
+                    onTap: _navigateToReposList,
+                    child: ProfileInfo(
+                      userName: _user.name,
+                      bio: _user.bio,
+                      imageUrl: _user.avatarUrl,
+                    )))
+            : null,
+      ].where((t) => t != null).toList(),
     );
   }
 }
