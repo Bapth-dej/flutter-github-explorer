@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_github_explorer/src/home/widgets/list_repos/list_repos.dart';
-import 'package:flutter_github_explorer/src/home/widgets/repo_s_readme/repo_s_readme.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_github_explorer/styles.dart';
 
@@ -39,14 +38,14 @@ class _Home extends State<Home> {
         body: homeDisplayState == HomeDisplayState.explorer
             ? Explorer(
                 navigateToReposList: () => setState(() {
-                      homeDisplayState = HomeDisplayState.listRepo;
-                    }))
-            : homeDisplayState == HomeDisplayState.listRepo
-                ? ListRepos(
-                    navigateToRepoReadMe: () => setState(() {
-                          homeDisplayState = HomeDisplayState.listRepo;
-                        }))
-                : ReposReadme(),
+                  homeDisplayState = HomeDisplayState.listRepo;
+                }),
+              )
+            : ListRepos(
+                navigateToExplorer: () => setState(() {
+                  homeDisplayState = HomeDisplayState.explorer;
+                }),
+              ),
       ),
     );
   }

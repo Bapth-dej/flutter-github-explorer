@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_github_explorer/src/home/widgets/repo_s_readme/repo_s_readme.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_github_explorer/styles.dart';
 import '../../models/order_list_by.dart';
@@ -11,9 +12,9 @@ import '../../models/repo_model.dart';
 import '../../models/user.dart';
 
 class ListRepos extends StatelessWidget {
-  final navigateToRepoReadMe;
+  final navigateToExplorer;
 
-  ListRepos({this.navigateToRepoReadMe});
+  ListRepos({this.navigateToExplorer});
 
   List<RepoModel> _getListOfReposOrderedBy(
       List<RepoModel> originalListOfRepos, OrderListBy orderListBy) {
@@ -49,27 +50,51 @@ class ListRepos extends StatelessWidget {
   void _handleRepoTap(
       BuildContext context, int index, User user, RepoModel repo) async {
     print("Fetching ${user.username}, ${repo.name}");
-    final response = await http.get(
-        "https://api.github.com/repos/${user.username}/${repo.name}/readme");
-    if (response.statusCode == 200) {
-      // If server returns an OK response, parse the JSON.
-      Map<String, dynamic> jsonResponse = json.decode(response.body);
-      const base64 = Base64Decoder();
-      const utf8 = Utf8Codec();
-      try {
-        var content = jsonResponse['content'].replaceAll(new RegExp(r'\n'), '');
-        print(content);
-        // "SGVsbG8gd29ybGQ="
-        var decodedresponse = base64.convert(content);
-        var textResponse = utf8.decode(decodedresponse);
-        print(textResponse);
-        Provider.of<Repos>(context, listen: false)
-            .updateCurrentSearchedRepoReadme(textResponse);
-      } catch (e) {
-        print(e.toString());
+    // If server returns an OK response, parse the JSON.
+    String textResponse, errorMessage;
+    try {
+      final response = await http.get(
+          "https://api.github.com/repos/${user.username}/${repo.name}/readme");
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonResponse;
+        const base64 = Base64Decoder();
+        const utf8 = Utf8Codec();
+
+        try {
+          jsonResponse = json.decode(response.body);
+        } catch (error) {
+          errorMessage =
+              "The server returned an unexpected response. Please try again later.";
+        }
+
+        if (jsonResponse['content'] == null) {
+          errorMessage =
+              "The server returned an unexpected response. Please try again later.";
+        } else {
+          var content =
+              jsonResponse['content'].replaceAll(new RegExp(r'\n'), '');
+          var decodedresponse = base64.convert(content);
+          textResponse = utf8.decode(decodedresponse);
+        }
+      } else {
+        errorMessage =
+            "Server answered with an error, please wait while we try to fix the problem.";
       }
-    } else {
-      print("ko ${json.decode(response.body)}");
+    } catch (error) {
+      errorMessage =
+          "The server is unavailable. Please check your connexion or try again later.";
+      print(error.toString());
+    }
+    if (textResponse != null) {
+      showModalBottomSheet(
+        context: context,
+        builder: (_) => ReposReadme(readmeText: textResponse, repo: repo),
+      );
+    } else if (errorMessage != null) {
+      final wrongReadmeAPIResponseSnackBar = SnackBar(
+        content: Text(errorMessage),
+      );
+      Scaffold.of(context).showSnackBar(wrongReadmeAPIResponseSnackBar);
     }
   }
 
@@ -88,11 +113,12 @@ class ListRepos extends StatelessWidget {
       OrderListBy.language,
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("${user.name}'s repos"),
-      ),
-      body: Column(
+    return WillPopScope(
+      onWillPop: () async {
+        navigateToExplorer();
+        return true;
+      },
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Row(

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_github_explorer/styles.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'dart:convert';
 
 import './widgets/profile_info.dart';
-import '../list_repos/list_repos.dart';
 import '../../models/repo_model.dart';
 import '../../models/user.dart';
 import '../../providers/repos_change_notifier.dart';
@@ -24,7 +22,6 @@ class _Explorer extends State<Explorer> {
 
   String _name = "";
   bool _clickable = false;
-  User _user;
 
   @override
   void initState() {
@@ -41,58 +38,121 @@ class _Explorer extends State<Explorer> {
 
   void handleFetch() {
     setState(() {
-      _user = null;
       _clickable = false;
     });
-    fetchUser();
-    fetchRepos();
+    _fetchUser();
   }
 
-  void fetchUser() async {
+  void _fetchUser() async {
     print("fetching user");
-    final response = await http.get("https://api.github.com/users/$_name");
-    if (response.statusCode == 200) {
-      // If server returns an OK response, parse the JSON.
-      Map<String, dynamic> jsonResponse = json.decode(response.body);
-      if (jsonResponse['login'] != null) {
-        User user = User.fromJson(jsonResponse);
-        setState(() {
-          _user = user;
-        });
+    User user;
+    String errorMessage;
+    //the http.get throws an error if it doesn't get an answer
+    try {
+      final response = await http.get("https://api.github.com/users/$_name");
+      if (response.statusCode == 200) {
+        // If server returns an OK response, parse the JSON.
+        //We check if it has the correct shape
+        Map<String, dynamic> jsonResponse;
+        try {
+          jsonResponse = json.decode(response.body);
+        } catch (error) {
+          errorMessage =
+              "The server returned an unexpected response. Please try again later.";
+        }
+
+        //We check that the login field exists
+        if (jsonResponse['login'] == null) {
+          errorMessage =
+              "The server returned an unexpected response. Please try again later.";
+        } else {
+          user = User.fromJson(jsonResponse);
+        }
+      } else if (response.statusCode == 404) {
+        errorMessage = "User not found, please check the username.";
+      } else {
+        //If the server returns an error
+        errorMessage =
+            "Server answered with an error, please wait while we try to fix the problem.";
       }
+    } catch (error) {
+      errorMessage =
+          "The server is unavailable. Please check your connexion or try again later.";
+      print(error.toString());
+    }
+
+    Provider.of<Repos>(context).updateCurrentSearchedUser(user);
+    if (errorMessage != null) {
+      final wrongReadmeAPIResponseSnackBar = SnackBar(
+        content: Text(errorMessage),
+      );
+      Scaffold.of(context).showSnackBar(wrongReadmeAPIResponseSnackBar);
     } else {
-      // If that response was not OK
       setState(() {
-        _user = null;
+        _clickable = true;
       });
     }
     print("done fetching user");
   }
 
-  void fetchRepos() async {
+  void _fetchRepos() async {
     print("fetching repos");
-    final response =
-        await http.get("https://api.github.com/users/$_name/repos");
-    if (response.statusCode == 200) {
-      List<RepoModel> listOfRepos = [];
-      List<Map<String, dynamic>> listOfMapRepos = [];
-      List<dynamic> jsonListOfrepos = json.decode(response.body);
-      for (var jsonRepo in jsonListOfrepos) {
-        if (jsonRepo is Map<String, dynamic>) {
-          listOfMapRepos.add(jsonRepo);
-          print("ok ${jsonRepo['name']}");
-        } else
-          print("ko $jsonRepo");
+    List<RepoModel> listOfRepos = [];
+    String errorMessage;
+    try {
+      final response =
+          await http.get("https://api.github.com/users/$_name/repos");
+      if (response.statusCode == 200) {
+        // If server returns an OK response, parse the JSON.
+        //We check if it has the correct shape
+        List<dynamic> jsonListOfrepos;
+        try {
+          jsonListOfrepos = json.decode(response.body);
+        } catch (error) {
+          errorMessage =
+              "The server returned an unexpected response. Please try again later.";
+        }
+
+        //json.decode returns a List<dynamic> when we want a List<Map<String, dynamic>>
+        //we only keep elements of the list that are ok and parse it to RepoModel class
+        for (var jsonRepo in jsonListOfrepos) {
+          if (jsonRepo is Map<String, dynamic> && jsonRepo['name'] != null) {
+            listOfRepos.add(RepoModel.fromJson(jsonRepo));
+            print("ok ${jsonRepo['name']}");
+          }
+        }
+
+        //If the list is empty, then the response si not what we expected
+        if (listOfRepos.isEmpty) {
+          errorMessage =
+              "The server returned an unexpected response. Please try again later.";
+        }
+      } else if (response.statusCode == 404) {
+        errorMessage = "User's repos not found, please check the username.";
+      } else {
+        //If the server returns an error
+        errorMessage =
+            "Server answered with an error, please wait while we try to fix the problem.";
       }
-      for (var jsonRepo in jsonListOfrepos) {
-        listOfRepos.add(RepoModel.fromJson(jsonRepo));
-      }
-      setState(() {
-        _clickable = true;
-      });
+    } catch (error) {
+      errorMessage =
+          "The server is unavailable. Please check your connexion or try again later.";
+      print(error.toString());
+    }
+    if (listOfRepos != []) {
       Provider.of<Repos>(context, listen: false)
           .updateCurrentSearchedUserListOfRepos(listOfRepos);
+    } else {
+      Provider.of<Repos>(context, listen: false)
+          .updateCurrentSearchedUserListOfRepos(null);
     }
+    if (errorMessage != null) {
+      final wrongReadmeAPIResponseSnackBar = SnackBar(
+        content: Text(errorMessage),
+      );
+      Scaffold.of(context).showSnackBar(wrongReadmeAPIResponseSnackBar);
+    }
+
     print("done fetching repos");
   }
 
@@ -104,11 +164,15 @@ class _Explorer extends State<Explorer> {
   }
 
   void _navigateToReposList() {
-    if (_clickable) widget.navigateToReposList();
+    if (_clickable) {
+      _fetchRepos();
+      widget.navigateToReposList();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    User user = Provider.of<Repos>(context).currentSearchedUser;
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
@@ -117,22 +181,23 @@ class _Explorer extends State<Explorer> {
           autofocus: true,
           controller: nameInputController,
           cursorColor: Colors.deepOrangeAccent,
-          onEditingComplete: fetchUser,
+          decoration: InputDecoration(labelText: 'Search username on Github'),
+          onEditingComplete: _fetchUser,
         ),
         RaisedButton(
           onPressed: () => handleFetch(),
           child: Text('Fetch user'),
         ),
-        _user != null
+        user != null
             ? Card(
                 elevation: 8.0,
                 child: InkWell(
                     splashColor: Colors.deepOrange,
                     onTap: _navigateToReposList,
                     child: ProfileInfo(
-                      userName: _user.name,
-                      bio: _user.bio,
-                      imageUrl: _user.avatarUrl,
+                      userName: user.name,
+                      bio: user.bio,
+                      imageUrl: user.avatarUrl,
                     )))
             : null,
       ].where((t) => t != null).toList(),

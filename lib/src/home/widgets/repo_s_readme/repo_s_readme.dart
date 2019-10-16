@@ -1,29 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_github_explorer/styles.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../models/repo_model.dart';
-import '../../providers/repos_change_notifier.dart';
 
 class ReposReadme extends StatelessWidget {
+  final String readmeText;
+  final RepoModel repo;
+  ReposReadme({this.readmeText, this.repo});
+
   @override
   Widget build(BuildContext context) {
-    RepoModel repo = Provider.of<Repos>(context).currentSearchedRepo;
-    String readmeText = Provider.of<Repos>(context).currentSeacrchedRepoReadme;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          repo.name,
-          style: Styles.navBarTitle,
-        ),
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Container(child: Text(readmeText)),
-          ),
-        ],
-      ),
-    );
+    return
+
+        //Column(
+        //children: <Widget>[
+        //Text(
+        //repo.name,
+        //style: Styles.headerLarge,
+        //),
+        Markdown(data: readmeText) //,
+        //SingleChildScrollView(child: Text(readmeText)),
+        //],)
+        ;
   }
 }
