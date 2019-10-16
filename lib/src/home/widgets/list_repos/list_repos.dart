@@ -76,6 +76,8 @@ class ListRepos extends StatelessWidget {
           var decodedresponse = base64.convert(content);
           textResponse = utf8.decode(decodedresponse);
         }
+      } else if (response.statusCode == 404) {
+        errorMessage = "This repo doesn\'t provide a README file.";
       } else {
         errorMessage =
             "Server answered with an error, please wait while we try to fix the problem.";
