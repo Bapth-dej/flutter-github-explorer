@@ -69,10 +69,13 @@ class _Explorer extends State<Explorer> {
         }
       } else if (response.statusCode == 404) {
         errorMessage = "User not found, please check the username.";
+      } else if (response.statusCode == 403) {
+        errorMessage =
+            "You made too many requests, please wait and try again later.";
       } else {
         //If the server returns an error
         errorMessage =
-            "Server answered with an error, please wait while we try to fix the problem.";
+            "${response.statusCode} Server answered with an error, please wait while we try to fix the problem.";
       }
     } catch (error) {
       errorMessage =
@@ -165,6 +168,9 @@ class _Explorer extends State<Explorer> {
       bool shouldNavigate = await _fetchRepos();
       if (shouldNavigate) {
         print(Provider.of<Repos>(context).currentSearchedUserListOfRepos);
+        setState(() {
+          _clickable = false;
+        });
         widget.navigateToReposList();
       }
     }

@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_github_explorer/src/home/widgets/list_repos/widgets/repo_item.dart';
 import 'package:flutter_github_explorer/src/home/widgets/repo_s_readme/repo_s_readme.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_github_explorer/styles.dart';
 import '../../models/order_list_by.dart';
 import 'package:provider/provider.dart';
 
@@ -117,6 +117,7 @@ class ListRepos extends StatelessWidget {
 
     return WillPopScope(
       onWillPop: () async {
+        Provider.of<Repos>(context).updateCurrentSearchedUser(null);
         navigateToExplorer();
         return false;
       },
@@ -145,33 +146,10 @@ class ListRepos extends StatelessWidget {
               itemCount: listOfRepos.length,
               itemBuilder: (context, index) {
                 final _currRepo = listOfRepos[index];
-                return Card(
-                  elevation: 8.0,
-                  child: InkWell(
-                    onTap: () => _handleRepoTap(
-                      context,
-                      index,
-                      user,
-                      _currRepo,
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        Text(
-                          _currRepo.name,
-                          style: Styles.headerLarge,
-                        ),
-                        Text(
-                          "(${_currRepo.language})",
-                          style: Styles.textDefault,
-                        ),
-                        Text(
-                          _currRepo.description,
-                          style: Styles.textDefault,
-                        ),
-                        Text("Created: ${_currRepo.createdAt.toString()}"),
-                      ],
-                    ),
-                  ),
+                return RepoItem(
+                  repo: _currRepo,
+                  handleRepoTap: () =>
+                      _handleRepoTap(context, index, user, _currRepo),
                 );
               },
             ),

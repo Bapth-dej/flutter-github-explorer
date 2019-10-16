@@ -11,7 +11,7 @@ class RepoModel {
       name: json['name'],
       description: json['description'] ?? "No description provided.",
       createdAt: DateTime.parse(json['created_at']),
-      language: json['language'],
+      language: json['language'] ?? "No language specified",
     );
   }
 }
