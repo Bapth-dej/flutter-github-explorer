@@ -49,7 +49,6 @@ class ListRepos extends StatelessWidget {
 
   void _handleRepoTap(
       BuildContext context, int index, User user, RepoModel repo) async {
-    print("Fetching ${user.username}, ${repo.name}");
     // If server returns an OK response, parse the JSON.
     String textResponse, errorMessage;
     try {
@@ -78,6 +77,9 @@ class ListRepos extends StatelessWidget {
         }
       } else if (response.statusCode == 404) {
         errorMessage = "This repo doesn\'t provide a README file.";
+      } else if (response.statusCode == 403) {
+        errorMessage =
+            "You made too many requests, please wait and try again later.";
       } else {
         errorMessage =
             "Server answered with an error, please wait while we try to fix the problem.";
@@ -85,7 +87,6 @@ class ListRepos extends StatelessWidget {
     } catch (error) {
       errorMessage =
           "The server is unavailable. Please check your connexion or try again later.";
-      print(error.toString());
     }
     if (textResponse != null) {
       showModalBottomSheet(

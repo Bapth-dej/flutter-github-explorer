@@ -43,7 +43,6 @@ class _Explorer extends State<Explorer> {
   }
 
   void _fetchUser() async {
-    print("fetching user");
     User user;
     String errorMessage;
     //the http.get throws an error if it doesn't get an answer
@@ -80,7 +79,6 @@ class _Explorer extends State<Explorer> {
     } catch (error) {
       errorMessage =
           "The server is unavailable. Please check your connexion or try again later.";
-      print(error.toString());
     }
 
     Provider.of<Repos>(context).updateCurrentSearchedUser(user);
@@ -94,11 +92,9 @@ class _Explorer extends State<Explorer> {
         _clickable = true;
       });
     }
-    print("done fetching user");
   }
 
   Future<bool> _fetchRepos() async {
-    print("fetching repos");
     List<RepoModel> listOfRepos = [];
     String errorMessage;
     try {
@@ -120,7 +116,6 @@ class _Explorer extends State<Explorer> {
         for (var jsonRepo in jsonListOfrepos) {
           if (jsonRepo is Map<String, dynamic> && jsonRepo['name'] != null) {
             listOfRepos.add(RepoModel.fromJson(jsonRepo));
-            print("ok ${jsonRepo['name']}");
           }
         }
 
@@ -131,6 +126,9 @@ class _Explorer extends State<Explorer> {
         }
       } else if (response.statusCode == 404) {
         errorMessage = "User's repos not found, please check the username.";
+      } else if (response.statusCode == 403) {
+        errorMessage =
+            "You made too many requests, please wait and try again later.";
       } else {
         //If the server returns an error
         errorMessage =
@@ -139,7 +137,6 @@ class _Explorer extends State<Explorer> {
     } catch (error) {
       errorMessage =
           "The server is unavailable. Please check your connexion or try again later.";
-      print(error.toString());
     }
     if (listOfRepos != []) {
       Provider.of<Repos>(context, listen: false)
@@ -152,12 +149,10 @@ class _Explorer extends State<Explorer> {
       Scaffold.of(context).showSnackBar(wrongReadmeAPIResponseSnackBar);
     }
 
-    print("done fetching repos");
     return !(listOfRepos == [] || errorMessage != null);
   }
 
   void _onNameInputChanged() {
-    print("Second text field: ${nameInputController.text}");
     setState(() {
       _name = nameInputController.text;
     });
@@ -167,7 +162,6 @@ class _Explorer extends State<Explorer> {
     if (_clickable) {
       bool shouldNavigate = await _fetchRepos();
       if (shouldNavigate) {
-        print(Provider.of<Repos>(context).currentSearchedUserListOfRepos);
         setState(() {
           _clickable = false;
         });
