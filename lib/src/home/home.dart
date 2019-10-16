@@ -6,11 +6,12 @@ import 'package:flutter_github_explorer/styles.dart';
 import './providers/repos_change_notifier.dart';
 import './widgets/explorer/explorer.dart';
 
-enum HomeDisplayState { explorer, listRepo, repoSReadme }
+enum HomeDisplayState { explorer, listRepo }
 
 class Home extends StatefulWidget {
   final String title;
-  Home({Key key, this.title}) : super(key: key);
+  final HomeDisplayState homeDisplayState;
+  Home({Key key, this.title, this.homeDisplayState}) : super(key: key);
 
   @override
   _Home createState() => _Home();

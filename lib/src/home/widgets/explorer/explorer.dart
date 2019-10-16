@@ -10,8 +10,7 @@ import '../../providers/repos_change_notifier.dart';
 
 class Explorer extends StatefulWidget {
   final navigateToReposList;
-
-  Explorer({this.navigateToReposList});
+  Explorer({@required this.navigateToReposList});
 
   @override
   _Explorer createState() => _Explorer();
@@ -95,7 +94,7 @@ class _Explorer extends State<Explorer> {
     print("done fetching user");
   }
 
-  void _fetchRepos() async {
+  Future<bool> _fetchRepos() async {
     print("fetching repos");
     List<RepoModel> listOfRepos = [];
     String errorMessage;
@@ -142,9 +141,6 @@ class _Explorer extends State<Explorer> {
     if (listOfRepos != []) {
       Provider.of<Repos>(context, listen: false)
           .updateCurrentSearchedUserListOfRepos(listOfRepos);
-    } else {
-      Provider.of<Repos>(context, listen: false)
-          .updateCurrentSearchedUserListOfRepos(null);
     }
     if (errorMessage != null) {
       final wrongReadmeAPIResponseSnackBar = SnackBar(
@@ -154,6 +150,7 @@ class _Explorer extends State<Explorer> {
     }
 
     print("done fetching repos");
+    return !(listOfRepos == [] || errorMessage != null);
   }
 
   void _onNameInputChanged() {
@@ -163,10 +160,13 @@ class _Explorer extends State<Explorer> {
     });
   }
 
-  void _navigateToReposList() {
+  void _navigateToReposList(String name) async {
     if (_clickable) {
-      _fetchRepos();
-      widget.navigateToReposList();
+      bool shouldNavigate = await _fetchRepos();
+      if (shouldNavigate) {
+        print(Provider.of<Repos>(context).currentSearchedUserListOfRepos);
+        widget.navigateToReposList();
+      }
     }
   }
 
@@ -193,7 +193,7 @@ class _Explorer extends State<Explorer> {
                 elevation: 8.0,
                 child: InkWell(
                     splashColor: Colors.deepOrange,
-                    onTap: _navigateToReposList,
+                    onTap: () => _navigateToReposList(user.name),
                     child: ProfileInfo(
                       userName: user.name,
                       bio: user.bio,

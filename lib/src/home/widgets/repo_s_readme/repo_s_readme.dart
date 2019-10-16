@@ -7,7 +7,7 @@ import '../../models/repo_model.dart';
 class ReposReadme extends StatelessWidget {
   final String readmeText;
   final RepoModel repo;
-  ReposReadme({this.readmeText, this.repo});
+  ReposReadme({@required this.readmeText, @required this.repo});
 
   @override
   Widget build(BuildContext context) {

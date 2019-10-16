@@ -14,7 +14,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepOrange,
       ),
-      home: Home(title: 'GitHub Explorer'),
+      home: Home(
+        title: 'GitHub Explorer',
+      ),
     );
   }
 }

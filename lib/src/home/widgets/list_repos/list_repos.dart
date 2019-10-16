@@ -118,7 +118,7 @@ class ListRepos extends StatelessWidget {
     return WillPopScope(
       onWillPop: () async {
         navigateToExplorer();
-        return true;
+        return false;
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
