@@ -53,7 +53,7 @@ class ListRepos extends StatelessWidget {
     String textResponse, errorMessage;
     try {
       final response = await http.get(
-          "https://api.github.com/repos/${user.username}/${repo.name}/readme");
+          "https://api.github.com/repos/${user.login}/${repo.name}/readme");
       if (response.statusCode == 200) {
         Map<String, dynamic> jsonResponse;
         const base64 = Base64Decoder();

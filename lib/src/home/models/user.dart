@@ -7,12 +7,12 @@ class User {
   @JsonKey(name: 'avatar_url')
   final String avatarUrl;
   final String name;
-  final String username;
+  final String login;
   final String bio;
 
-  User(String avatarUrl, String bio, String name, this.username)
+  User(String avatarUrl, String bio, String name, this.login)
       : avatarUrl = avatarUrl ?? "",
-        name = name ?? username,
+        name = name ?? login,
         bio = bio ?? "";
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

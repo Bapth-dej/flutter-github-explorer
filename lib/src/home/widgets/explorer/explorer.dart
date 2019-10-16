@@ -158,7 +158,7 @@ class _Explorer extends State<Explorer> {
     });
   }
 
-  void _navigateToReposList(String name) async {
+  void _navigateToReposList() async {
     if (_clickable) {
       bool shouldNavigate = await _fetchRepos();
       if (shouldNavigate) {
@@ -193,7 +193,7 @@ class _Explorer extends State<Explorer> {
                 elevation: 8.0,
                 child: InkWell(
                     splashColor: Colors.deepOrange,
-                    onTap: () => _navigateToReposList(user.name),
+                    onTap: () => _navigateToReposList(),
                     child: ProfileInfo(
                       userName: user.name,
                       bio: user.bio,
