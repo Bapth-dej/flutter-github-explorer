@@ -11,17 +11,14 @@ class ReposReadme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return
-
-        //Column(
-        //children: <Widget>[
-        //Text(
-        //repo.name,
-        //style: Styles.headerLarge,
-        //),
-        Markdown(data: readmeText) //,
-        //SingleChildScrollView(child: Text(readmeText)),
-        //],)
-        ;
+    return Column(
+      children: <Widget>[
+        Text(
+          repo.name,
+          style: Styles.headerLarge,
+        ),
+        Expanded(child: Markdown(data: readmeText)),
+      ],
+    );
   }
 }
