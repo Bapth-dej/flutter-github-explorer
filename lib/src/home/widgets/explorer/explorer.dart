@@ -78,7 +78,7 @@ class _Explorer extends State<Explorer> {
       }
     } catch (error) {
       errorMessage =
-          "The server is unavailable. Please check your connexion or try again later.";
+          "The server is unavailable. Please check your connection or try again later.";
     }
 
     Provider.of<Repos>(context).updateCurrentSearchedUser(user);
@@ -103,9 +103,9 @@ class _Explorer extends State<Explorer> {
       if (response.statusCode == 200) {
         // If server returns an OK response, parse the JSON.
         //We check if it has the correct shape
-        List<dynamic> jsonListOfrepos;
+        List<dynamic> jsonListOfRepos;
         try {
-          jsonListOfrepos = json.decode(response.body);
+          jsonListOfRepos = json.decode(response.body);
         } catch (error) {
           errorMessage =
               "The server returned an unexpected response. Please try again later.";
@@ -113,13 +113,13 @@ class _Explorer extends State<Explorer> {
 
         //json.decode returns a List<dynamic> when we want a List<Map<String, dynamic>>
         //we only keep elements of the list that are ok and parse it to RepoModel class
-        for (var jsonRepo in jsonListOfrepos) {
+        for (var jsonRepo in jsonListOfRepos) {
           if (jsonRepo is Map<String, dynamic> && jsonRepo['name'] != null) {
             listOfRepos.add(RepoModel.fromJson(jsonRepo));
           }
         }
 
-        //If the list is empty, then the response si not what we expected
+        //If the list is empty, then the response is not what we expected
         if (listOfRepos.isEmpty) {
           errorMessage =
               "The server returned an unexpected response. Please try again later.";
@@ -136,7 +136,7 @@ class _Explorer extends State<Explorer> {
       }
     } catch (error) {
       errorMessage =
-          "The server is unavailable. Please check your connexion or try again later.";
+          "The server is unavailable. Please check your connection or try again later.";
     }
     if (listOfRepos != []) {
       Provider.of<Repos>(context, listen: false)

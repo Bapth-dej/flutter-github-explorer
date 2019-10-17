@@ -34,8 +34,8 @@ class ListRepos extends StatelessWidget {
     return listOfRepos;
   }
 
-  String _getDropDownMenuItemString(OrderListBy itemChoosen) {
-    switch (itemChoosen) {
+  String _getDropDownMenuItemString(OrderListBy itemChosen) {
+    switch (itemChosen) {
       case OrderListBy.date:
         return "Date";
       case OrderListBy.alphabetical:
@@ -72,8 +72,8 @@ class ListRepos extends StatelessWidget {
         } else {
           var content =
               jsonResponse['content'].replaceAll(new RegExp(r'\n'), '');
-          var decodedresponse = base64.convert(content);
-          textResponse = utf8.decode(decodedresponse);
+          var decodedResponse = base64.convert(content);
+          textResponse = utf8.decode(decodedResponse);
         }
       } else if (response.statusCode == 404) {
         errorMessage = "This repo doesn\'t provide a README file.";
@@ -86,7 +86,7 @@ class ListRepos extends StatelessWidget {
       }
     } catch (error) {
       errorMessage =
-          "The server is unavailable. Please check your connexion or try again later.";
+          "The server is unavailable. Please check your connection or try again later.";
     }
     if (textResponse != null) {
       showModalBottomSheet(
@@ -129,10 +129,10 @@ class ListRepos extends StatelessWidget {
             children: <Widget>[
               Text("Order list by: "),
               DropdownButton<OrderListBy>(
-                items: _orderListByItems.map((OrderListBy orderlistBy) {
+                items: _orderListByItems.map((OrderListBy orderListBy) {
                   return DropdownMenuItem<OrderListBy>(
-                    value: orderlistBy,
-                    child: Text(_getDropDownMenuItemString(orderlistBy)),
+                    value: orderListBy,
+                    child: Text(_getDropDownMenuItemString(orderListBy)),
                   );
                 }).toList(),
                 onChanged: (OrderListBy orderListBy) {

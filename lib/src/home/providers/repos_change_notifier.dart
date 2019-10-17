@@ -8,7 +8,7 @@ class Repos with ChangeNotifier {
   User currentSearchedUser;
   List<RepoModel> currentSearchedUserListOfRepos;
   RepoModel currentSearchedRepo;
-  String currentSeacrchedRepoReadme;
+  String currentSearchedRepoReadme;
   OrderListBy orderListBy;
 
   void updateCurrentSearchedUser(User _user) {
@@ -30,7 +30,7 @@ class Repos with ChangeNotifier {
     this.currentSearchedRepo = _repo;
   }
 
-  void updateCurrentSearchedRepoReadme(String _reporeadme) {
-    this.currentSeacrchedRepoReadme = _reporeadme;
+  void updateCurrentSearchedRepoReadme(String _repoReadme) {
+    this.currentSearchedRepoReadme = _repoReadme;
   }
 }

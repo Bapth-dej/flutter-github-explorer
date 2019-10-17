@@ -31,6 +31,9 @@ class _Home extends State<Home> {
       builder: (context) => Repos(),
       child: Scaffold(
         appBar: AppBar(
+          leading: homeDisplayState == HomeDisplayState.explorer
+              ? null
+              : BackButton(),
           title: Text(
             widget.title,
             style: Styles.navBarTitle,
