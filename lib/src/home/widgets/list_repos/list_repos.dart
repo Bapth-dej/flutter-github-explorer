@@ -110,11 +110,7 @@ class ListRepos extends StatelessWidget {
 
     final user = Provider.of<Repos>(context).currentSearchedUser;
 
-    var _orderListByItems = [
-      OrderListBy.date,
-      OrderListBy.alphabetical,
-      OrderListBy.language,
-    ];
+    List<OrderListBy> _orderListByItems = OrderListBy.values;
 
     return WillPopScope(
       onWillPop: () async {

@@ -185,7 +185,7 @@ class _Explorer extends State<Explorer> {
           onEditingComplete: _fetchUser,
         ),
         RaisedButton(
-          onPressed: () => handleFetch(),
+          onPressed: _name.isEmpty ? null : () => handleFetch(),
           child: Text('Fetch user'),
         ),
         user != null
